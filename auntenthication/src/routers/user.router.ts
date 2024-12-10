@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
-import { verifyToken } from "../middleware/verify";
+import { verifyTokenProm } from "../middleware/verify";
 
 export class UserRouter {
   private userController: UserController;
@@ -13,8 +13,8 @@ export class UserRouter {
   }
 
   private initializeRoutes() {
-    this.router.get("/", verifyToken, this.userController.getUsers);
-    this.router.get("/profile", verifyToken, this.userController.getUserId);
+    this.router.get("/", verifyTokenProm, this.userController.getUsers);
+    this.router.get("/profile", verifyTokenProm, this.userController.getUserId);
     this.router.post("/", this.userController.createUser);
 
     this.router.patch("/:id", this.userController.editUser);

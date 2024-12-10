@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import { UserPayload } from "../custom";
+import { PromPayload, UserPayload } from "../custom";
 
-export const verifyToken = async (
+export const verifyTokenUser = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -14,6 +14,25 @@ export const verifyToken = async (
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
     req.user = verifiedUser as UserPayload;
+
+    next();
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
+export const verifyTokenProm = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = req.cookies?.token
+    if (!token) throw "Unathorize";
+
+    const verifiedProm = verify(token, process.env.JWT_KEY!);
+    req.user = verifiedProm as PromPayload;
 
     next();
   } catch (error) {

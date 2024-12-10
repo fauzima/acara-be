@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyToken } from "../middleware/verify";
+import { verifyTokenUser } from "../middleware/verify";
 import { PromotorController } from "../controllers/promotor.controller";
 
 export class PromotorRouter {
@@ -13,10 +13,10 @@ export class PromotorRouter {
   }
 
   private initializeRoutes() {
-    this.router.get("/", verifyToken, this.promotorController.getPromotors);
+    this.router.get("/", verifyTokenUser, this.promotorController.getPromotors);
     this.router.get(
       "/profile",
-      verifyToken,
+      verifyTokenUser,
       this.promotorController.getPromotorId
     );
     this.router.post("/", this.promotorController.createPromotor);

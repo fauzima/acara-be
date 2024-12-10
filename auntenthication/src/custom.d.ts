@@ -4,7 +4,7 @@ export type UserPayload = {
   id: number;
 };
 
-export type PromotorPayload = {
+export type PromPayload = {
   id: number;
 };
 
@@ -12,7 +12,7 @@ declare global {
   namespace Express {
     export interface Request {
       user?: UserPayload;
-      promotor?: PromotorPayload;
+      promotor?: PromPayload;
     }
   }
 }
