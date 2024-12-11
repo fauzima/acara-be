@@ -44,7 +44,7 @@ export class UserController {
   async createUser(req: Request, res: Response) {
     try {
       await prisma.user.create({ data: req.body });
-      res.status(201).send("User created");
+      res.status(201).send({message:"Akun pengguna baru berhasil dibuat"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -55,7 +55,7 @@ export class UserController {
     try {
       const { id } = req.params;
       await prisma.user.update({ data: req.body, where: { id: id } });
-      res.status(200).send("User updated");
+      res.status(200).send({message:"Akun pengguna berhasil diedit"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -66,7 +66,7 @@ export class UserController {
     try {
       const { id } = req.params;
       await prisma.user.delete({ where: { id: id } });
-      res.status(200).send("User deleted");
+      res.status(200).send({message:"Akun pengguna berhasil dihapus"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

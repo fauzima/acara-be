@@ -10,7 +10,7 @@ export const verifyTokenUser = async (
   try {
     // const token = req.header("Authorization")?.replace("Bearer ", "");
     const token = req.cookies?.token
-    if (!token) throw "Unathorize";
+    if (!token) throw {message:"Tidak ada izin untuk mengakses"};
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
     req.user = verifiedUser as UserPayload;
@@ -29,7 +29,8 @@ export const verifyTokenProm = async (
 ) => {
   try {
     const token = req.cookies?.token
-    if (!token) throw "Unathorize";
+    if (!token) throw {message:"Tidak ada izin untuk mengakses"};
+
 
     const verifiedProm = verify(token, process.env.JWT_KEY!);
     req.user = verifiedProm as PromPayload;

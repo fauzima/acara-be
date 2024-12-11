@@ -13,10 +13,11 @@ export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
       let { password, confirmPassword, username, email, inputRef } = req.body;
-      if (password != confirmPassword) throw {message:"Password not match"};
+      if (password != confirmPassword)
+        throw { message: "Kata sandi tidak cocok" };
 
       const user = await findUser(username, email);
-      if (user) throw {message:"username or email has been used"};
+      if (user) throw { message: "Nama pengguna atau email sudah terdaftar" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
@@ -27,7 +28,7 @@ export class AuthController {
 
       if (inputRef) {
         const asd = await findRefCode(inputRef);
-        if (!asd) throw "gada refcode di database";
+        if (!asd) throw { message: "Kode rujukan tidak ditemukan" };
       }
 
       if (inputRef == "") inputRef = null;
@@ -54,11 +55,13 @@ export class AuthController {
       await transporter.sendMail({
         from: "ahady1105@gmail.com",
         to: email,
-        subject: "welcome to Acara.com",
+        subject: "Selamat datang di Acara.com",
         html,
       });
 
-      res.status(201).send({message:"Register Successfully"});
+      res
+        .status(201)
+        .send({ message: "Proses pendaftaran berhasil dilakukan" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -70,25 +73,29 @@ export class AuthController {
       const { data, password } = req.body;
       const user = await findUser(data, data);
 
-      if (!user) throw {message:"Account not found"};
+      if (!user) throw { message: "Akun tidak ditemukan" };
       // if (user.isSuspend) throw { message: "Account Suspended!" };
-      if (!user.isVerify) throw { message: "Account Not Verify!" };
+      if (!user.isVerified)
+        throw { message: "Akun pengguna belum terverifikasi!" };
 
       const isValidPassword = await compare(password, user.password);
-      if (!isValidPassword) throw "Incorrect Password";
+      if (!isValidPassword) throw { message: "Kata sandi salah" };
 
       const payload = { id: user.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
-      res.status(200).cookie("token", token, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      }).send({
-        message: "Login Successfully",
-        user,
-      });
+      res
+        .status(200)
+        .cookie("token", token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+        })
+        .send({
+          message: "Proses login berhasil dilakukan",
+          user,
+        });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -99,8 +106,12 @@ export class AuthController {
     try {
       const { token } = req.params;
       const verifiedUser: any = verify(token, process.env.JWT_KEY!);
+
+      if (verifiedUser.isVerified == true)
+        throw { message: "Akun sudah terverifikasi" };
+
       await prisma.user.update({
-        data: { isVerify: true },
+        data: { isVerified: true },
         where: { id: verifiedUser.id },
       });
 
@@ -119,18 +130,18 @@ export class AuthController {
           const expire = new Date(now + 2592000000);
 
           // api posting referred user's point
-          await prisma.user_Point.create({
-            data: { userId: refUser.id, expireAt: expire },
+          await prisma.userPoint.create({
+            data: { userId: refUser.id, expiredAt: expire },
           });
 
           // api posting verified user's coupon
-          await prisma.user_Coupon.create({
-            data: { userId: verifiedUser.id, expireAt: expire },
+          await prisma.userCoupon.create({
+            data: { userId: verifiedUser.id, expiredAt: expire },
           });
         }
       }
 
-      res.status(200).send({message:"Verify successfully"})
+      res.status(200).send({ message: "Proses verifikasi berhasil dilakukan" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -140,10 +151,10 @@ export class AuthController {
   async registerPromotor(req: Request, res: Response) {
     try {
       const { password, confirmPassword, name, email } = req.body;
-      if (password != confirmPassword) throw {message:"Password not match"};
+      if (password != confirmPassword) throw { message: "Kata sandi salah" };
 
       const promotor = await findPromotor(name, email);
-      if (promotor) throw {message:"name or email has been used"};
+      if (promotor) throw { message: "Nama atau email sudah terdaftar" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
@@ -160,7 +171,11 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
       const link = `http://localhost:3000/organizer/verify/${token}`;
 
-      const templatePath = path.join(__dirname, "../templates", "verifyProm.hbs");
+      const templatePath = path.join(
+        __dirname,
+        "../templates",
+        "verifyProm.hbs"
+      );
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({ name, link });
@@ -168,13 +183,11 @@ export class AuthController {
       await transporter.sendMail({
         from: "ahady1105@gmail.com",
         to: email,
-        subject: "welcome to Acara.com",
+        subject: "Selamat datang di Acara.com",
         html,
       });
 
-      
-
-      res.status(201).send({message:"Register Successfully"});
+      res.status(201).send({ message: "Proses pendaftaran berhasil" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -186,24 +199,27 @@ export class AuthController {
       const { data, password } = req.body;
       const promotor = await findPromotor(data, data);
 
-      if (!promotor) throw {message:"Account not found"};
-      if (!promotor.isVerify) throw { message: "Account Not Verify!" }
+      if (!promotor) throw { message: "Akun promotor tidak ditemukan" };
+      if (!promotor.isVerified) throw { message: "Akun belum terverifikasi" };
 
       const isValidPassword = await compare(password, promotor.password);
-      if (!isValidPassword) throw {message:"Incorrect Password"};
+      if (!isValidPassword) throw { message: "Kata sandi salah" };
 
       const payload = { id: promotor.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
-      res.status(200).cookie("token", token, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      }).send({
-        message: "Login Successfully",
-        promotor,
-      });
+      res
+        .status(200)
+        .cookie("token", token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+        })
+        .send({
+          message: "Proses login berhasil dilakukan",
+          promotor,
+        });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -214,12 +230,16 @@ export class AuthController {
     try {
       const { token } = req.params;
       const verifiedProm: any = verify(token, process.env.JWT_KEY!);
+
+      if (verifiedProm.isVerified)
+        throw { message: "Akun sudah terverifikasi" };
+
       await prisma.promotor.update({
-        data: { isVerify: true },
+        data: { isVerified: true },
         where: { id: verifiedProm.id },
       });
 
-      res.status(200).send({message:"Verify successfully"})
+      res.status(200).send({ message: "Proses verifikasi berhasil dilakukan" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

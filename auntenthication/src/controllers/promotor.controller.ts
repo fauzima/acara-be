@@ -44,7 +44,7 @@ export class PromotorController {
   async createPromotor(req: Request, res: Response) {
     try {
       await prisma.promotor.create({ data: req.body });
-      res.status(201).send("Promotor created");
+      res.status(201).send({message:"Akun promotor baru berhasil dibuat"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -55,7 +55,7 @@ export class PromotorController {
     try {
       const { id } = req.params;
       await prisma.promotor.update({ data: req.body, where: { id: id } });
-      res.status(200).send("Promotor updated");
+      res.status(200).send({message:"Akun promotor berhasil diedit"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -66,7 +66,7 @@ export class PromotorController {
     try {
       const { id } = req.params;
       await prisma.promotor.delete({ where: { id: id } });
-      res.status(200).send("Promotor deleted");
+      res.status(200).send({message:"Akun promotor berhasil dihapus"});
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
