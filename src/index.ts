@@ -23,8 +23,6 @@ app.get("/api", (req: Request, res: Response) => {
   res.status(200).send("welcome to my API");
 });
 
-// console.log(process.env.DATABASE_URL)
-
 const userRouter = new UserRouter();
 const authRouter = new AuthRouter();
 const promRouter = new PromotorRouter();

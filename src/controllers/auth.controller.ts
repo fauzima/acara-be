@@ -130,7 +130,7 @@ export class AuthController {
           if (refUser) {
             // count the expiry date
             const now = new Date().getTime();
-            const expire = new Date(now + 2592000000);
+            const expire = new Date(now + 7776000000);
 
             // api posting referred user's point
             await prisma.userPoint.create({
