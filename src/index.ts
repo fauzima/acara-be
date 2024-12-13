@@ -5,6 +5,8 @@ import { AuthRouter } from "./routers/auth.router";
 import { PromotorRouter } from "./routers/promotor.router";
 import cookieParser from "cookie-parser";
 
+require("dotenv").config();
+
 const PORT: number = 8000;
 
 const app: Application = express();
@@ -20,6 +22,8 @@ app.use(cookieParser());
 app.get("/api", (req: Request, res: Response) => {
   res.status(200).send("welcome to my API");
 });
+
+// console.log(process.env.DATABASE_URL)
 
 const userRouter = new UserRouter();
 const authRouter = new AuthRouter();

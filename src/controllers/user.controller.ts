@@ -5,12 +5,12 @@ import { Prisma } from "@prisma/client";
 export class UserController {
   async getUsers(req: Request, res: Response) {
     try {
-      console.log(req.user);
+      console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.UserWhereInput = {};
       if (search) {
         filter.OR = [
-          { username: { contains: search as string, mode: "insensitive" } },
+          { name: { contains: search as string, mode: "insensitive" } },
           { email: { contains: search as string, mode: "insensitive" } },
         ];
       }
@@ -32,7 +32,7 @@ export class UserController {
   async getUserId(req: Request, res: Response) {
     try {
       const user = await prisma.user.findUnique({
-        where: { id: `${req.user?.id}` },
+        where: { id: `${req.acc?.id}` },
       });
       res.status(200).send({ user });
     } catch (error) {
@@ -44,7 +44,7 @@ export class UserController {
   async createUser(req: Request, res: Response) {
     try {
       await prisma.user.create({ data: req.body });
-      res.status(201).send({message:"Akun pengguna baru berhasil dibuat"});
+      res.status(201).send({ message: "Akun pengguna baru berhasil dibuat" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -55,7 +55,7 @@ export class UserController {
     try {
       const { id } = req.params;
       await prisma.user.update({ data: req.body, where: { id: id } });
-      res.status(200).send({message:"Akun pengguna berhasil diedit"});
+      res.status(200).send({ message: "Akun pengguna berhasil diedit" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -66,7 +66,7 @@ export class UserController {
     try {
       const { id } = req.params;
       await prisma.user.delete({ where: { id: id } });
-      res.status(200).send({message:"Akun pengguna berhasil dihapus"});
+      res.status(200).send({ message: "Akun pengguna berhasil dihapus" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

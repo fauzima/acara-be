@@ -12,11 +12,11 @@ import handlebars from "handlebars";
 export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
-      let { password, confirmPassword, username, email, inputRef } = req.body;
+      let { password, confirmPassword, name, email, inputRef } = req.body;
       if (password != confirmPassword)
         throw { message: "Kata sandi tidak cocok" };
 
-      const user = await findUser(username, email);
+      const user = await findUser(name, email);
       if (user) throw { message: "Nama pengguna atau email sudah terdaftar" };
 
       const salt = await genSalt(10);
@@ -35,7 +35,7 @@ export class AuthController {
 
       const newUser = await prisma.user.create({
         data: {
-          username,
+          name,
           email,
           password: hashPassword,
           refCode: newRefCode,
@@ -47,10 +47,14 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
       const link = `http://localhost:3000/user/verify/${token}`;
 
-      const templatePath = path.join(__dirname, "../templates", "verify.hbs");
+      const templatePath = path.join(
+        __dirname,
+        "../templates",
+        "verifyUser.hbs"
+      );
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
-      const html = compiledTemplate({ username, link });
+      const html = compiledTemplate({ name, link });
 
       await transporter.sendMail({
         from: "ahady1105@gmail.com",
@@ -81,9 +85,10 @@ export class AuthController {
       const isValidPassword = await compare(password, user.password);
       if (!isValidPassword) throw { message: "Kata sandi salah" };
 
-      const payload = { id: user.id };
+      const payload = { id: user.id, role: "user" };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
+      const acc = { ...user, role: "user" };
       res
         .status(200)
         .cookie("token", token, {
@@ -94,7 +99,7 @@ export class AuthController {
         })
         .send({
           message: "Proses login berhasil dilakukan",
-          user,
+          user: acc,
         });
     } catch (error) {
       console.log(error);
@@ -205,7 +210,7 @@ export class AuthController {
       const isValidPassword = await compare(password, promotor.password);
       if (!isValidPassword) throw { message: "Kata sandi salah" };
 
-      const payload = { id: promotor.id };
+      const payload = { id: promotor.id, role: "promotor" };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
       res
@@ -240,6 +245,53 @@ export class AuthController {
       });
 
       res.status(200).send({ message: "Proses verifikasi berhasil dilakukan" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(error);
+    }
+  }
+
+  // async checkAccType(req: Request, res: Response) {
+  //   try {
+  //     const { id } = req.params;
+
+  //     const user = await prisma.user.findFirst({ where: { id: id } });
+  //     if (user) res.status(200).send({ type: "user" });
+
+  //     const prom = await prisma.promotor.findFirst({
+  //       where: { id: id },
+  //     });
+  //     if (prom) res.status(200).send({ type: "promotor" });
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(400).send(error);
+  //   }
+  // }
+
+  async getSession(req: Request, res: Response) {
+    try {
+      // interface Session {
+      //   role?: "user" | "promotor";
+      //   username?: string;
+      //   name?: string;
+      //   email?: string;
+      //   avatar?: string | null;
+      // }
+      const role = req.acc?.role;
+
+      let acc: any = {};
+
+      if (role == "user") {
+        acc = await prisma.user.findUnique({
+          where: { id: req.acc?.id },
+        });
+      } else if (role == "promotor") {
+        acc = await prisma.promotor.findUnique({
+          where: { id: req.acc?.id },
+        });
+      }
+      acc.role = role;
+      res.status(200).send({ acc });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

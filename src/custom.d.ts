@@ -1,23 +1,19 @@
 import "express";
 
-export type UserPayload = {
+export type AccPayload = {
   id: string;
-};
-
-export type PromPayload = {
-  id: string;
+  role: "user" | "promotor"
 };
 
 export type EventPayload = {
-  id: string
-}
+  id: string;
+};
 
 declare global {
   namespace Express {
     export interface Request {
-      user?: UserPayload;
-      promotor?: PromPayload;
-      event?: EventPayload
+      acc?: AccPayload;
+      event?: EventPayload;
     }
   }
 }

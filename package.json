@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && node dist/index.js",
+    "build": "tsc && cp -rv public dist/public",
+    "start": "npm run build && node dist/index.js && set NODE_ENV=dev",
     "dev": "ts-node-dev src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -29,6 +29,7 @@
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",

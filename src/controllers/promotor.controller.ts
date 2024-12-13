@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 export class PromotorController {
   async getPromotors(req: Request, res: Response) {
     try {
-      console.log(req.promotor);
+      console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.PromotorWhereInput = {};
       if (search) {
@@ -14,7 +14,9 @@ export class PromotorController {
           { email: { contains: search as string, mode: "insensitive" } },
         ];
       }
-      const countPromotor = await prisma.promotor.aggregate({ _count: { _all: true } });
+      const countPromotor = await prisma.promotor.aggregate({
+        _count: { _all: true },
+      });
       const total_page = Math.ceil(+countPromotor._count._all / +limit);
       const promotors = await prisma.promotor.findMany({
         where: filter,
@@ -32,7 +34,7 @@ export class PromotorController {
   async getPromotorId(req: Request, res: Response) {
     try {
       const promotor = await prisma.promotor.findUnique({
-        where: { id: `${req.promotor?.id}` },
+        where: { id: `${req.acc?.id}` },
       });
       res.status(200).send({ promotor });
     } catch (error) {
@@ -44,7 +46,7 @@ export class PromotorController {
   async createPromotor(req: Request, res: Response) {
     try {
       await prisma.promotor.create({ data: req.body });
-      res.status(201).send({message:"Akun promotor baru berhasil dibuat"});
+      res.status(201).send({ message: "Akun promotor baru berhasil dibuat" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -55,7 +57,7 @@ export class PromotorController {
     try {
       const { id } = req.params;
       await prisma.promotor.update({ data: req.body, where: { id: id } });
-      res.status(200).send({message:"Akun promotor berhasil diedit"});
+      res.status(200).send({ message: "Akun promotor berhasil diedit" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -66,7 +68,7 @@ export class PromotorController {
     try {
       const { id } = req.params;
       await prisma.promotor.delete({ where: { id: id } });
-      res.status(200).send({message:"Akun promotor berhasil dihapus"});
+      res.status(200).send({ message: "Akun promotor berhasil dihapus" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
