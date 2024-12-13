@@ -112,38 +112,41 @@ export class AuthController {
       const { token } = req.params;
       const verifiedUser: any = verify(token, process.env.JWT_KEY!);
 
-      if (verifiedUser.isVerified == true)
-        throw { message: "Akun sudah terverifikasi" };
-
-      await prisma.user.update({
-        data: { isVerified: true },
-        where: { id: verifiedUser.id },
-      });
-
       const user = await prisma.user.findUnique({
         where: { id: verifiedUser.id },
       });
-      const refCode = user?.inputRef;
-      console.log(refCode);
 
-      if (refCode) {
-        const refUser = await findRefCode(refCode);
+      if (user?.isVerified == false) {
+        await prisma.user.update({
+          data: { isVerified: true },
+          where: { id: user?.id },
+        });
+        const refCode = user?.inputRef;
+        console.log(refCode);
 
-        if (refUser) {
-          // count the expiry date
-          const now = new Date().getTime();
-          const expire = new Date(now + 2592000000);
+        if (refCode) {
+          const refUser = await findRefCode(refCode);
 
-          // api posting referred user's point
-          await prisma.userPoint.create({
-            data: { userId: refUser.id, expiredAt: expire },
-          });
+          if (refUser) {
+            // count the expiry date
+            const now = new Date().getTime();
+            const expire = new Date(now + 2592000000);
 
-          // api posting verified user's coupon
-          await prisma.userCoupon.create({
-            data: { userId: verifiedUser.id, expiredAt: expire },
-          });
+            // api posting referred user's point
+            await prisma.userPoint.create({
+              data: { userId: refUser.id, expiredAt: expire },
+            });
+
+            // api posting verified user's coupon
+            await prisma.userCoupon.create({
+              data: { userId: verifiedUser.id, expiredAt: expire },
+            });
+          }
         }
+      }
+
+      if (user?.isVerified == true) {
+        throw { message: "Akun sudah terverifikasi" };
       }
 
       res.status(200).send({ message: "Proses verifikasi berhasil dilakukan" });
@@ -236,13 +239,20 @@ export class AuthController {
       const { token } = req.params;
       const verifiedProm: any = verify(token, process.env.JWT_KEY!);
 
-      if (verifiedProm.isVerified)
-        throw { message: "Akun sudah terverifikasi" };
-
-      await prisma.promotor.update({
-        data: { isVerified: true },
+      const prom = await prisma.promotor.findUnique({
         where: { id: verifiedProm.id },
       });
+
+      if (prom?.isVerified == false) {
+        await prisma.promotor.update({
+          data: { isVerified: true },
+          where: { id: verifiedProm.id },
+        });
+      }
+
+      if (prom?.isVerified == true) {
+        throw { message: "Akun sudah terverifikasi" };
+      }
 
       res.status(200).send({ message: "Proses verifikasi berhasil dilakukan" });
     } catch (error) {
@@ -251,32 +261,8 @@ export class AuthController {
     }
   }
 
-  // async checkAccType(req: Request, res: Response) {
-  //   try {
-  //     const { id } = req.params;
-
-  //     const user = await prisma.user.findFirst({ where: { id: id } });
-  //     if (user) res.status(200).send({ type: "user" });
-
-  //     const prom = await prisma.promotor.findFirst({
-  //       where: { id: id },
-  //     });
-  //     if (prom) res.status(200).send({ type: "promotor" });
-  //   } catch (error) {
-  //     console.log(error);
-  //     res.status(400).send(error);
-  //   }
-  // }
-
   async getSession(req: Request, res: Response) {
     try {
-      // interface Session {
-      //   role?: "user" | "promotor";
-      //   username?: string;
-      //   name?: string;
-      //   email?: string;
-      //   avatar?: string | null;
-      // }
       const role = req.acc?.role;
 
       let acc: any = {};
