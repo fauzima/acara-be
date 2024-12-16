@@ -4,6 +4,7 @@ import { UserRouter } from "./routers/user.router";
 import { AuthRouter } from "./routers/auth.router";
 import { PromotorRouter } from "./routers/promotor.router";
 import cookieParser from "cookie-parser";
+import { DashboardRouter } from "./routers/dashboard.router";
 
 require("dotenv").config();
 
@@ -26,10 +27,12 @@ app.get("/api", (req: Request, res: Response) => {
 const userRouter = new UserRouter();
 const authRouter = new AuthRouter();
 const promRouter = new PromotorRouter();
+const dashRouter = new DashboardRouter();
 
 app.use("/api/users", userRouter.getRouter());
 app.use("/api/auth", authRouter.getRouter());
 app.use("/api/promotors", promRouter.getRouter());
+app.use("/api/dashboard", dashRouter.getRouter());
 
 app.listen(PORT, () => {
   console.log(`server running on -> http://localhost:${PORT}/api`);
