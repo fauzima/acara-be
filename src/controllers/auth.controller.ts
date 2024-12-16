@@ -177,7 +177,7 @@ export class AuthController {
 
       const payload = { id: newProm.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
-      const link = `http://localhost:3000/organizer/verify/${token}`;
+      const link = `http://localhost:3000/promotor/verify/${token}`;
 
       const templatePath = path.join(
         __dirname,
