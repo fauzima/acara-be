@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { verifyToken } from "../middleware/verify";
 import { DashboardController } from "../controllers/dashboard.controller";
+import { verifyToken } from "../middleware/verify";
 
 export class DashboardRouter {
   private dashboardController: DashboardController;
@@ -13,8 +13,7 @@ export class DashboardRouter {
   }
 
   private initializeRoutes() {
-    this.router.get("/event",this.dashboardController.getActiveEvents)
-
+    this.router.get("/summary/", verifyToken, this.dashboardController.getSummaries);
   }
 
   getRouter(): Router {

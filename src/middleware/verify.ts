@@ -8,9 +8,8 @@ export const verifyToken = async (
   next: NextFunction
 ) => {
   try {
-    // const token = req.header("Authorization")?.replace("Bearer ", "");
-    const token = req.cookies?.token
-    if (!token) throw {message:"Tidak ada izin untuk mengakses"};
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) throw { message: "Tidak ada izin untuk mengakses" };
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
     req.acc = verifiedUser as AccPayload;
@@ -21,35 +20,3 @@ export const verifyToken = async (
     res.status(400).send(error);
   }
 };
-
-// export const verifyTokenProm = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const token = req.cookies?.token
-//     if (!token) throw {message:"Tidak ada izin untuk mengakses"};
-
-
-//     const verifiedProm = verify(token, process.env.JWT_KEY!);
-//     req.user = verifiedProm as PromPayload;
-
-//     next();
-//   } catch (error) {
-//     console.log(error);
-//     res.status(400).send(error);
-//   }
-// };
-
-// export const checkAdmin = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//     if(req.user?.role == "Admin"){
-//         next()
-//     } else{
-//         res.status(400).send("Unathorize, Admin only")
-//     }
-// };

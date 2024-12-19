@@ -57,15 +57,15 @@ export class AuthController {
       const html = compiledTemplate({ name, link });
 
       await transporter.sendMail({
-        from: "ahady1105@gmail.com",
+        from: "acaradotcom@gmail.com",
         to: email,
         subject: "Selamat datang di Acara.com",
         html,
       });
 
-      res
-        .status(201)
-        .send({ message: "Proses pendaftaran berhasil dilakukan" });
+      res.status(201).send({
+        message: `Proses pendaftaran berhasil dilakukan. Cek email ${newUser.email} untuk verifikasi akun anda.`,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -78,9 +78,11 @@ export class AuthController {
       const user = await findUser(data, data);
 
       if (!user) throw { message: "Akun tidak ditemukan" };
-      // if (user.isSuspend) throw { message: "Account Suspended!" };
       if (!user.isVerified)
-        throw { message: "Akun pengguna belum terverifikasi!" };
+        throw {
+          message:
+            "Akun pengguna belum terverifikasi! Cek email anda untuk verifikasi akun anda.",
+        };
 
       const isValidPassword = await compare(password, user.password);
       if (!isValidPassword) throw { message: "Kata sandi salah" };
@@ -89,18 +91,11 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
       const acc = { ...user, role: "user" };
-      res
-        .status(200)
-        .cookie("token", token, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-        })
-        .send({
-          message: "Proses login berhasil dilakukan",
-          user: acc,
-        });
+      res.status(200).send({
+        message: "Proses login berhasil dilakukan",
+        user: acc,
+        token,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -189,13 +184,15 @@ export class AuthController {
       const html = compiledTemplate({ name, link });
 
       await transporter.sendMail({
-        from: "ahady1105@gmail.com",
+        from: "acaradotcom@gmail.com",
         to: email,
         subject: "Selamat datang di Acara.com",
         html,
       });
 
-      res.status(201).send({ message: "Proses pendaftaran berhasil" });
+      res.status(201).send({
+        message: `Proses pendaftaran berhasil dilakukan. Cek email ${newProm.email} untuk verifikasi akun anda.`,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -208,7 +205,11 @@ export class AuthController {
       const promotor = await findPromotor(data, data);
 
       if (!promotor) throw { message: "Akun promotor tidak ditemukan" };
-      if (!promotor.isVerified) throw { message: "Akun belum terverifikasi" };
+      if (!promotor.isVerified)
+        throw {
+          message:
+            "Akun belum terverifikasi! Cek email anda untuk verifikasi akun anda.",
+        };
 
       const isValidPassword = await compare(password, promotor.password);
       if (!isValidPassword) throw { message: "Kata sandi salah" };
@@ -216,18 +217,12 @@ export class AuthController {
       const payload = { id: promotor.id, role: "promotor" };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
-      res
-        .status(200)
-        .cookie("token", token, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-        })
-        .send({
-          message: "Proses login berhasil dilakukan",
-          promotor,
-        });
+      const acc = { ...promotor, role: "promotor" };
+      res.status(200).send({
+        message: "Proses login berhasil dilakukan",
+        promotor: acc,
+        token,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -277,6 +272,7 @@ export class AuthController {
         });
       }
       acc.role = role;
+
       res.status(200).send({ acc });
     } catch (error) {
       console.log(error);
