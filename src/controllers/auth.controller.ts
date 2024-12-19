@@ -89,18 +89,11 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
       const acc = { ...user, role: "user" };
-      res
-        .status(200)
-        .cookie("token", token, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-        })
-        .send({
-          message: "Proses login berhasil dilakukan",
-          user: acc,
-        });
+      res.status(200).send({
+        message: "Proses login berhasil dilakukan",
+        user: acc,
+        token,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -215,19 +208,13 @@ export class AuthController {
 
       const payload = { id: promotor.id, role: "promotor" };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
-
-      res
-        .status(200)
-        .cookie("token", token, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-        })
-        .send({
-          message: "Proses login berhasil dilakukan",
-          promotor,
-        });
+      const acc = { ...promotor, role: "promotor" };
+      
+      res.status(200).send({
+        message: "Proses login berhasil dilakukan",
+        promotor: acc,
+        token,
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

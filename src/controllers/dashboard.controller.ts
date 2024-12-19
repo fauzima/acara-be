@@ -2,57 +2,49 @@ import { Request, Response } from "express";
 import prisma from "../prisma";
 
 export class DashboardController {
-  async getActiveEvents(req: Request, res: Response) {
+  async getSummaries(req: Request, res: Response) {
     try {
-       const {id} = req.body
+      // dapetin id
+     // console.log(req.cookies);
 
-      const data = await prisma.event.aggregate({ where: { id: id }, _count: {_all:true} });
-      res.status(200).send({ data: data });
-    } catch (error) {
-      console.log(error);
-      res.status(400).send(error);
-    }
-  }
-  async getTotalTransaction(req: Request, res: Response) {
-    try {
       const id = req.acc?.id;
+      console.log(id);
 
-      const data = await prisma.event.findMany({ where: { id: id } });
-      res.status(200).send({ data: data });
-    } catch (error) {
-      console.log(error);
-      res.status(400).send(error);
-    }
-  }
-  async getTotalTicket(req: Request, res: Response) {
-    try {
-      const id = req.acc?.id;
+      // dapetin total event
+      const events = await prisma.event.findMany({
+        where: { promotorId: id },
+      });
 
-      const data = await prisma.event.findMany({ where: { id: id } });
-      res.status(200).send({ data: data });
-    } catch (error) {
-      console.log(error);
-      res.status(400).send(error);
-    }
-  }
-  async getProfit(req: Request, res: Response) {
-    try {
-      const id = req.acc?.id;
+      console.log(events);
 
-      const data = await prisma.event.findMany({ where: { id: id } });
-      res.status(200).send({ data: data });
-    } catch (error) {
-      console.log(error);
-      res.status(400).send(error);
-    }
-  }
-  async getTotalAtendees(req: Request, res: Response) {
-    try {
-      const id = req.acc?.id;
+      const totalEvents: number = events.length;
 
-      const data = await prisma.event.findMany({ where: { id: id } });
-      res.status(200).send({ data: data });
+      // dapetin total transaksi
+      const order = await prisma.order.findMany({
+        where: { status: "Paid", event: { is: { promotorId: id } } },
+        select: { finalPrice: true },
+      });
+      const totalOrders: number = order.length;
+
+      //dapetin total penjualan
+      const totalProfit: number = order.reduce(
+        (n, { finalPrice }) => n + finalPrice,
+        0
+      );
+
+      //dapetin total tiket terjual
+      const ticket = await prisma.orderDetails.findMany({
+        where: {
+          order: { is: { status: "Paid", event: { is: { promotorId: id } } } },
+        },
+        select: { qty: true },
+      });
+      const totalTickets = ticket.reduce((n, { qty }) => n + qty, 0);
+
+      res.status(200).send({ totalEvents, totalOrders, totalProfit, totalTickets },);
     } catch (error) {
+     // console.log(req.cookies);
+
       console.log(error);
       res.status(400).send(error);
     }

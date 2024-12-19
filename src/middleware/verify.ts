@@ -8,11 +8,16 @@ export const verifyToken = async (
   next: NextFunction
 ) => {
   try {
-    // const token = req.header("Authorization")?.replace("Bearer ", "");
-    const token = req.cookies?.token
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    // console.log(req.cookies);
+    
+    // const token = req.cookies?.token
+    // console.log(token)
     if (!token) throw {message:"Tidak ada izin untuk mengakses"};
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
+    // console.log(verifiedUser);
+    
     req.acc = verifiedUser as AccPayload;
 
     next();
