@@ -1,15 +1,19 @@
 import "express";
-import { RoleUser } from "@prisma/client";
 
-export type UserPayload = {
-  id: number;
-  role: RoleUser;
+export type AccPayload = {
+  id: string;
+  role: "user" | "promotor"
+};
+
+export type EventPayload = {
+  id: string;
 };
 
 declare global {
   namespace Express {
     export interface Request {
-      user?: UserPayload;
+      acc?: AccPayload;
+      event?: EventPayload;
     }
   }
 }

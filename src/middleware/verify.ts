@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import { UserPayload } from "../custom";
+import { AccPayload } from "../custom";
 
 export const verifyToken = async (
   req: Request,
@@ -9,26 +9,14 @@ export const verifyToken = async (
 ) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) throw "Unathorize";
+    if (!token) throw { message: "Tidak ada izin untuk mengakses" };
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
-    req.user = verifiedUser as UserPayload;
+    req.acc = verifiedUser as AccPayload;
 
     next();
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
   }
-};
-
-export const checkAdmin = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-    if(req.user?.role == "Admin"){
-        next()
-    } else{
-        res.status(400).send("Unathorize, Admin only")
-    }
 };
