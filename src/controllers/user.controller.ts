@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
+import { cloudinaryUpload } from "../services/cloudinary";
 
 export class UserController {
   async getUsers(req: Request, res: Response) {
     try {
+      console.log(process.env.CLOUD_NAME)
       console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.UserWhereInput = {};
@@ -67,6 +69,23 @@ export class UserController {
       const { id } = req.params;
       await prisma.user.delete({ where: { id: id } });
       res.status(200).send({ message: "Akun pengguna berhasil dihapus" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(error);
+    }
+  }
+
+  async editAvatarCloud(req: Request, res: Response) {
+    try {
+      if (!req.file) throw { message: "file empty" };
+      const { secure_url } = await cloudinaryUpload(req.file, "avatar");
+
+      await prisma.user.update({
+        data: { avatar: secure_url },
+        where: { id: req.acc?.id },
+      });
+
+      res.status(200).send({ message: "avatar edited!" });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

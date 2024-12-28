@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
 import { verifyToken } from "../middleware/verify";
+import { upload } from "..";
 
 export class UserRouter {
   private userController: UserController;
@@ -16,6 +17,12 @@ export class UserRouter {
     this.router.get("/", verifyToken, this.userController.getUsers);
     this.router.get("/profile", verifyToken, this.userController.getUserId);
     this.router.post("/", this.userController.createUser);
+    this.router.patch(
+      "/avatar-cloud",
+      upload.single("image"),
+      verifyToken,
+      this.userController.editAvatarCloud
+    );
 
     this.router.patch("/:id", this.userController.editUser);
     this.router.delete("/:id", this.userController.deleteUser);
