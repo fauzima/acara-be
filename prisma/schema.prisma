@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -11,15 +12,23 @@ datasource db {
 enum EventCategory {
   Konser
   Festival
-  StandUpComedy
+  Pertandingan
+  Pameran
+  Konferensi
+  Workshop
+  Seminar
+  Pelatihan
+  Sertifikasi
 }
 
 enum EventLocation {
   Jakarta
-  Lampung
-  Surakarta
-  Banten
   Bandung
+  Yogyakarta
+  Surabaya
+  Solo
+  Medan
+  Bali
 }
 
 enum OrderStatus {
@@ -59,21 +68,22 @@ model Promotor {
 }
 
 model Event {
-  id          String        @id @default(uuid())
-  title       String
-  description String
-  category    EventCategory
-  location    EventLocation
-  venue       String
-  date        DateTime      @db.Date
-  time        DateTime      @db.Time()
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  promotorId  String
-  promotor    Promotor      @relation(fields: [promotorId], references: [id])
-  Ticket      Ticket[]
-  Order       Order[]
-  Review      Review[]
+  id         String        @id @default(uuid())
+  title      String
+  desc       String
+  category   EventCategory
+  location   EventLocation
+  venue      String
+  startDate  DateTime
+  endDate    DateTime
+  thumbnail  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  promotorId String
+  promotor   Promotor      @relation(fields: [promotorId], references: [id])
+  Ticket     Ticket[]
+  Order      Order[]
+  Review     Review[]
 }
 
 model Ticket {
@@ -82,11 +92,14 @@ model Ticket {
   desc         String
   seats        Int
   price        BigInt
+  startDate    DateTime
+  endDate      DateTime
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   eventId      String
   event        Event          @relation(fields: [eventId], references: [id])
   OrderDetails OrderDetails[]
+  UserPoint    UserPoint[]
 }
 
 model UserPoint {
@@ -98,6 +111,8 @@ model UserPoint {
   isRedeemed Boolean  @default(false)
   userId     String
   user       User     @relation(fields: [userId], references: [id])
+  ticketId   String?
+  ticket     Ticket?  @relation(fields: [ticketId], references: [id])
 }
 
 model UserCoupon {
@@ -128,13 +143,12 @@ model Order {
 
 model OrderDetails {
   id        String   @id @default(uuid())
-  ticketId  String
-  ticket    Ticket   @relation(fields: [ticketId], references: [id])
   qty       Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orderId   Int
   order     Order    @relation(fields: [orderId], references: [id])
+  Ticket    Ticket[]
 }
 
 model Review {
