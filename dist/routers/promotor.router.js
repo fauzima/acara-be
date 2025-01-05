@@ -13,6 +13,7 @@ class PromotorRouter {
     initializeRoutes() {
         this.router.get("/", verify_1.verifyToken, this.promotorController.getPromotors);
         this.router.get("/profile", verify_1.verifyToken, this.promotorController.getPromotorId);
+        this.router.get("/events", verify_1.verifyToken, this.promotorController.getEventsPromotor);
         this.router.post("/", this.promotorController.createPromotor);
         this.router.patch("/:id", this.promotorController.editPromotor);
         this.router.delete("/:id", this.promotorController.deletePromotor);

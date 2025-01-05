@@ -18,7 +18,6 @@ class UserController {
     getUsers(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(req.acc);
                 const { search, page = 1, limit = 3 } = req.query;
                 const filter = {};
                 if (search) {

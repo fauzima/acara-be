@@ -5,7 +5,6 @@ import { Prisma } from "../../prisma/generated/client";
 export class UserController {
   async getUsers(req: Request, res: Response) {
     try {
-      console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.UserWhereInput = {};
       if (search) {

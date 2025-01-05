@@ -45,7 +45,7 @@ export class AuthController {
 
       const payload = { id: newUser.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
-      const link = `${process.env.BASE_URL_FE!}user/verify/${token}`;
+      const link = `${process.env.BASE_URL_FE!}/user/verify/${token}`;
 
       const templatePath = path.join(
         __dirname,

@@ -17,12 +17,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.0.1
- * Query Engine version: 5dbef10bdbfb579e07d35cc85fb1518d357cb99e
+ * Prisma Client JS version: 6.1.0
+ * Query Engine version: 11f085a2012c0f4778414c8db2651556ee0ef959
  */
 Prisma.prismaVersion = {
-  client: "6.0.1",
-  engine: "5dbef10bdbfb579e07d35cc85fb1518d357cb99e"
+  client: "6.1.0",
+  engine: "11f085a2012c0f4778414c8db2651556ee0ef959"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -144,12 +144,13 @@ exports.Prisma.PromotorScalarFieldEnum = {
 exports.Prisma.EventScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  description: 'description',
+  desc: 'desc',
   category: 'category',
   location: 'location',
   venue: 'venue',
-  date: 'date',
-  time: 'time',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  thumbnail: 'thumbnail',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   promotorId: 'promotorId'
@@ -160,7 +161,10 @@ exports.Prisma.TicketScalarFieldEnum = {
   category: 'category',
   desc: 'desc',
   seats: 'seats',
+  remainingSeats: 'remainingSeats',
   price: 'price',
+  startDate: 'startDate',
+  endDate: 'endDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   eventId: 'eventId'
@@ -172,8 +176,9 @@ exports.Prisma.UserPointScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   expiredAt: 'expiredAt',
-  isRedeemed: 'isRedeemed',
-  userId: 'userId'
+  status: 'status',
+  userId: 'userId',
+  orderId: 'orderId'
 };
 
 exports.Prisma.UserCouponScalarFieldEnum = {
@@ -182,8 +187,9 @@ exports.Prisma.UserCouponScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   expiredAt: 'expiredAt',
-  isRedeemed: 'isRedeemed',
-  userId: 'userId'
+  status: 'status',
+  userId: 'userId',
+  orderId: 'orderId'
 };
 
 exports.Prisma.OrderScalarFieldEnum = {
@@ -193,18 +199,24 @@ exports.Prisma.OrderScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  expiredAt: 'expiredAt',
   userId: 'userId',
-  eventId: 'eventId',
-  paymentProof: 'paymentProof'
+  eventId: 'eventId'
 };
 
 exports.Prisma.OrderDetailsScalarFieldEnum = {
   id: 'id',
-  ticketId: 'ticketId',
   qty: 'qty',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  orderId: 'orderId'
+  orderId: 'orderId',
+  ticketId: 'ticketId'
+};
+
+exports.Prisma.AttendeeTicketScalarFieldEnum = {
+  id: 'id',
+  isAttended: 'isAttended',
+  orderDetailsId: 'orderDetailsId'
 };
 
 exports.Prisma.ReviewScalarFieldEnum = {
@@ -214,7 +226,8 @@ exports.Prisma.ReviewScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId',
-  eventId: 'eventId'
+  eventId: 'eventId',
+  attendeeTicketId: 'attendeeTicketId'
 };
 
 exports.Prisma.SortOrder = {
@@ -234,15 +247,29 @@ exports.Prisma.NullsOrder = {
 exports.EventCategory = exports.$Enums.EventCategory = {
   Konser: 'Konser',
   Festival: 'Festival',
-  StandUpComedy: 'StandUpComedy'
+  Pertandingan: 'Pertandingan',
+  Pameran: 'Pameran',
+  Konferensi: 'Konferensi',
+  Workshop: 'Workshop',
+  Seminar: 'Seminar',
+  Pelatihan: 'Pelatihan',
+  Sertifikasi: 'Sertifikasi'
 };
 
 exports.EventLocation = exports.$Enums.EventLocation = {
   Jakarta: 'Jakarta',
-  Lampung: 'Lampung',
-  Surakarta: 'Surakarta',
-  Banten: 'Banten',
-  Bandung: 'Bandung'
+  Bandung: 'Bandung',
+  Yogyakarta: 'Yogyakarta',
+  Surabaya: 'Surabaya',
+  Solo: 'Solo',
+  Medan: 'Medan',
+  Bali: 'Bali'
+};
+
+exports.BonusStatus = exports.$Enums.BonusStatus = {
+  Available: 'Available',
+  isRedeemed: 'isRedeemed',
+  Expired: 'Expired'
 };
 
 exports.OrderStatus = exports.$Enums.OrderStatus = {
@@ -261,6 +288,7 @@ exports.Prisma.ModelName = {
   UserCoupon: 'UserCoupon',
   Order: 'Order',
   OrderDetails: 'OrderDetails',
+  AttendeeTicket: 'AttendeeTicket',
   Review: 'Review'
 };
 

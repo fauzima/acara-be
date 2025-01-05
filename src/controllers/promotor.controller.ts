@@ -5,7 +5,6 @@ import { Prisma } from "../../prisma/generated/client";
 export class PromotorController {
   async getPromotors(req: Request, res: Response) {
     try {
-      console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.PromotorWhereInput = {};
       if (search) {
@@ -69,6 +68,37 @@ export class PromotorController {
       const { id } = req.params;
       await prisma.promotor.delete({ where: { id: id } });
       res.status(200).send({ message: "Akun promotor berhasil dihapus" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(error);
+    }
+  }
+
+  async getEventsPromotor(req: Request, res: Response) {
+    try {
+      const { type } = req.query;
+
+      const filter: Prisma.EventWhereInput = {};
+      if (type === "active") {
+        filter.AND = [
+          { Ticket: { some: {} } },
+          { endDate: { gt: new Date() } },
+        ];
+      } else if (type === "unactive") {
+        filter.endDate = { lt: new Date() };
+      }
+
+      const events = await prisma.event.findMany({
+        where: { promotorId: req.acc?.id, ...filter },
+        select: {
+          id: true,
+          title: true,
+          thumbnail: true,
+          startDate: true,
+          endDate: true,
+        },
+      });
+      res.status(200).send({ result: events });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);

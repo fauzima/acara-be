@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
 const prisma_1 = __importDefault(require("../prisma"));
+const formatMonth_1 = require("../helpers/formatMonth");
 class DashboardController {
     getSummaries(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,6 +48,109 @@ class DashboardController {
                 res
                     .status(200)
                     .send([totalEvents, totalOrders, totalProfit, totalTickets]);
+            }
+            catch (error) {
+                console.log(error);
+                res.status(400).send(error);
+            }
+        });
+    }
+    getEventAktif(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const id = (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id;
+            try {
+                const eventsDate = yield prisma_1.default.event.findMany({
+                    where: { promotorId: id },
+                    select: { startDate: true },
+                });
+                let arrYear = [];
+                let chartData = [];
+                for (const item of eventsDate) {
+                    const year = new Date(item.startDate).getFullYear();
+                    arrYear.push(year);
+                }
+                arrYear.sort((a, b) => a - b);
+                // const totalYear = arrYear.length;
+                for (const item of arrYear) {
+                    if (!JSON.stringify(chartData).includes(`${item}`)) {
+                        chartData.push({ year: `${item}`, event_active: 1 });
+                    }
+                    else {
+                        chartData[chartData.length - 1].event_active += 1;
+                    }
+                }
+                console.log(chartData);
+                res.status(200).send({ result: chartData });
+            }
+            catch (error) {
+                console.log(error);
+                res.status(400).send(error);
+            }
+        });
+    }
+    getTicket(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const id = (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id;
+                const ticket = yield prisma_1.default.order.findMany({
+                    where: {
+                        status: "Paid",
+                        event: {
+                            promotorId: id,
+                        },
+                    },
+                    select: {
+                        expiredAt: true,
+                        OrderDetails: {
+                            select: {
+                                qty: true,
+                            },
+                        },
+                    },
+                });
+                let amountTicket = [];
+                let chartData = [];
+                for (const item of ticket) {
+                    const month = new Date(item.expiredAt).getMonth();
+                    let qty = 0;
+                    for (const quantity of item.OrderDetails) {
+                        qty += quantity.qty;
+                    }
+                    amountTicket.push({ month, qty });
+                    amountTicket.sort((a, b) => a.month - b.month);
+                }
+                for (const item of amountTicket) {
+                    if (!JSON.stringify(chartData).includes((0, formatMonth_1.FormatMonth)(item.month))) {
+                        chartData.push({
+                            month: (0, formatMonth_1.FormatMonth)(item.month),
+                            total_ticket: item.qty,
+                        });
+                    }
+                    else {
+                        chartData[chartData.length - 1].total_ticket += item.qty;
+                    }
+                }
+                console.log(chartData);
+                res.status(200).send({ result: chartData });
+            }
+            catch (error) {
+                console.log(error);
+                res.status(400).send(error);
+            }
+        });
+    }
+    getTransaction(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const id = (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id;
+                const profit = yield prisma_1.default.order.findMany({
+                    where: { status: "Paid", event: { is: { promotorId: id } } },
+                    select: { finalPrice: true, expiredAt: true },
+                });
+                res.status(200).send(profit);
             }
             catch (error) {
                 console.log(error);

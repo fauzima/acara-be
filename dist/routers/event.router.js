@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRouter = void 0;
+exports.EventRouter = void 0;
 const express_1 = require("express");
 const event_controller_1 = require("../controllers/event.controller");
-class UserRouter {
+const verify_1 = require("../middleware/verify");
+const index_1 = require("../index");
+class EventRouter {
     constructor() {
         this.eventController = new event_controller_1.EventController();
         this.router = (0, express_1.Router)();
@@ -11,13 +13,11 @@ class UserRouter {
     }
     initializeRoutes() {
         this.router.get("/", this.eventController.getEvents);
-        this.router.post("/", this.eventController.createEvent);
+        this.router.post("/create", verify_1.verifyToken, index_1.upload.single("thumbnail"), this.eventController.createEvent);
         this.router.get("/:id", this.eventController.getEventId);
-        this.router.patch("/:id", this.eventController.editEvent);
-        this.router.delete("/:id", this.eventController.deleteEvent);
     }
     getRouter() {
         return this.router;
     }
 }
-exports.UserRouter = UserRouter;
+exports.EventRouter = EventRouter;

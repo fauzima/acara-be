@@ -11,7 +11,10 @@ class DashboardRouter {
         this.initializeRoutes();
     }
     initializeRoutes() {
-        this.router.get("/summary/", verify_1.verifyToken, this.dashboardController.getSummaries);
+        this.router.get("/summary", verify_1.verifyToken, this.dashboardController.getSummaries);
+        this.router.get("/eventaktif", verify_1.verifyToken, this.dashboardController.getEventAktif);
+        this.router.get("/ticket", verify_1.verifyToken, this.dashboardController.getTicket);
+        this.router.get("/transaction", verify_1.verifyToken, this.dashboardController.getTransaction);
     }
     getRouter() {
         return this.router;

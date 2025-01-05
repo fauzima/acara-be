@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { EventController } from "../controllers/event.controller";
+import { verifyToken } from "../middleware/verify";
+import { upload } from "../index";
 
-export class UserRouter {
+export class EventRouter {
   private eventController: EventController;
   private router: Router;
 
@@ -13,11 +15,14 @@ export class UserRouter {
 
   private initializeRoutes() {
     this.router.get("/", this.eventController.getEvents);
-    this.router.post("/", this.eventController.createEvent);
+    this.router.post(
+      "/create",
+      verifyToken,
+      upload.single("thumbnail"),
+      this.eventController.createEvent
+    );
 
     this.router.get("/:id", this.eventController.getEventId);
-    this.router.patch("/:id", this.eventController.editEvent);
-    this.router.delete("/:id", this.eventController.deleteEvent);
   }
 
   getRouter(): Router {
