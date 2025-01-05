@@ -13,9 +13,10 @@ export class DashboardRouter {
   }
 
   private initializeRoutes() {
-    this.router.get("/summary/", verifyToken, this.dashboardController.getSummaries);
+    this.router.get("/summary", verifyToken, this.dashboardController.getSummaries);
     this.router.get("/eventaktif",verifyToken,this.dashboardController.getEventAktif)
     this.router.get("/ticket",verifyToken,this.dashboardController.getTicket)
+    this.router.get("/transaction",verifyToken,this.dashboardController.getTransaction)
   }
 
   getRouter(): Router {

@@ -19,6 +19,11 @@ export class PromotorRouter {
       verifyToken,
       this.promotorController.getPromotorId
     );
+    this.router.get(
+      "/events",
+      verifyToken,
+      this.promotorController.getEventsPromotor
+    );
     this.router.post("/", this.promotorController.createPromotor);
 
     this.router.patch("/:id", this.promotorController.editPromotor);
