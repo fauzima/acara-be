@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import { AccPayload } from "../custom";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const verifyToken = async (
   req: Request,
@@ -12,8 +14,6 @@ export const verifyToken = async (
     if (!token) throw { message: "Tidak ada izin untuk mengakses" };
 
     const verifiedUser = verify(token, process.env.JWT_KEY!);
-    // console.log(verifiedUser);
-    
     req.acc = verifiedUser as AccPayload;
 
     next();

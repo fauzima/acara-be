@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../prisma/generated/client";
 
 export class PromotorController {
   async getPromotors(req: Request, res: Response) {
     try {
-      console.log(req.acc);
       const { search, page = 1, limit = 3 } = req.query;
       const filter: Prisma.PromotorWhereInput = {};
       if (search) {

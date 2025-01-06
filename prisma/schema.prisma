@@ -9,147 +9,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  email      String       @unique
-  password   String
-  avatar     String       @default("https://res.cloudinary.com/dowc5iu9c/image/upload/v1735754490/avatar/default-avatar.png")
-  createdAt  DateTime     @default(now())
-  refCode    String
-  id         String       @id @default(uuid())
-  inputRef   String?
-  isVerified Boolean      @default(false)
-  updatedAt  DateTime     @updatedAt
-  name       String       @unique
-  Order      Order[]
-  Review     Review[]
-  UserCoupon UserCoupon[]
-  UserPoint  UserPoint[]
-}
-
-model Promotor {
-  id         String   @id @default(uuid())
-  name       String   @unique
-  email      String   @unique
-  password   String
-  avatar     String   @default("https://res.cloudinary.com/dowc5iu9c/image/upload/v1735754490/avatar/default-avatar.png")
-  createdAt  DateTime @default(now())
-  isVerified Boolean  @default(false)
-  updatedAt  DateTime @updatedAt
-  Event      Event[]
-}
-
-model Event {
-  id         String        @id @default(uuid())
-  title      String
-  venue      String
-  promotorId String
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  category   EventCategory
-  location   EventLocation
-  desc       String
-  endDate    DateTime
-  startDate  DateTime
-  thumbnail  String?
-  promotor   Promotor      @relation(fields: [promotorId], references: [id])
-  Order      Order[]
-  Review     Review[]
-  Ticket     Ticket[]
-}
-
-model Ticket {
-  id             String         @id @default(uuid())
-  category       String
-  desc           String
-  seats          Int
-  price          BigInt
-  eventId        String
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  endDate        DateTime
-  startDate      DateTime
-  remainingSeats Int
-  OrderDetails   OrderDetails[]
-  event          Event          @relation(fields: [eventId], references: [id])
-}
-
-model UserPoint {
-  id        String      @id @default(uuid())
-  point     Int         @default(10000)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  expiredAt DateTime    @db.Date
-  userId    String
-  orderId   Int?
-  status    BonusStatus @default(Available)
-  Order     Order?      @relation(fields: [orderId], references: [id])
-  user      User        @relation(fields: [userId], references: [id])
-}
-
-model UserCoupon {
-  id         String      @id @default(uuid())
-  percentage Int         @default(10)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  expiredAt  DateTime    @db.Date
-  userId     String
-  orderId    Int?
-  status     BonusStatus @default(Available)
-  Order      Order?      @relation(fields: [orderId], references: [id])
-  user       User        @relation(fields: [userId], references: [id])
-}
-
-model Order {
-  id           Int            @id @default(autoincrement())
-  createdAt    DateTime       @default(now())
-  finalPrice   Int
-  totalPrice   Int
-  updatedAt    DateTime       @updatedAt
-  status       OrderStatus    @default(Pending)
-  expiredAt    DateTime       @db.Date
-  eventId      String
-  userId       String
-  event        Event          @relation(fields: [eventId], references: [id])
-  user         User           @relation(fields: [userId], references: [id])
-  OrderDetails OrderDetails[]
-  UserCoupon   UserCoupon[]
-  UserPoint    UserPoint[]
-}
-
-model OrderDetails {
-  id             String           @id @default(uuid())
-  qty            Int
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  orderId        Int
-  ticketId       String
-  AttendeeTicket AttendeeTicket[]
-  order          Order            @relation(fields: [orderId], references: [id])
-  Ticket         Ticket           @relation(fields: [ticketId], references: [id])
-}
-
-model Review {
-  id               String         @id @default(uuid())
-  description      String
-  rating           Int
-  userId           String
-  eventId          String
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  attendeeTicketId String         @unique
-  AttendeeTicket   AttendeeTicket @relation(fields: [attendeeTicketId], references: [id])
-  event            Event          @relation(fields: [eventId], references: [id])
-  user             User           @relation(fields: [userId], references: [id])
-}
-
-model AttendeeTicket {
-  id             String       @id
-  isAttended     Boolean      @default(false)
-  orderDetailsId String
-  OrderDetails   OrderDetails @relation(fields: [orderDetailsId], references: [id])
-  Review         Review?
-}
-
 enum EventCategory {
   Konser
   Festival
@@ -183,4 +42,145 @@ enum BonusStatus {
   Available
   isRedeemed
   Expired
+}
+
+model User {
+  id         String       @id @default(uuid())
+  name       String       @unique
+  email      String       @unique
+  password   String
+  avatar     String       @default("https://res.cloudinary.com/dowc5iu9c/image/upload/v1735754490/avatar/default-avatar.png")
+  refCode    String
+  inputRef   String?
+  isVerified Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  UserPoint  UserPoint[]
+  UserCoupon UserCoupon[]
+  Order      Order[]
+  Review     Review[]
+}
+
+model Promotor {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  email      String   @unique
+  password   String
+  avatar     String   @default("https://res.cloudinary.com/dowc5iu9c/image/upload/v1735754490/avatar/default-avatar.png")
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Event      Event[]
+}
+
+model Event {
+  id         String        @id @default(uuid())
+  title      String
+  desc       String
+  category   EventCategory
+  location   EventLocation
+  venue      String
+  startDate  DateTime
+  endDate    DateTime
+  thumbnail  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  promotorId String
+  promotor   Promotor      @relation(fields: [promotorId], references: [id])
+  Ticket     Ticket[]
+  Order      Order[]
+  Review     Review[]
+}
+
+model Ticket {
+  id             String           @id @default(uuid())
+  category       String
+  desc           String
+  seats          Int
+  remainingSeats Int
+  price          BigInt
+  startDate      DateTime
+  endDate        DateTime
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  eventId        String
+  event          Event            @relation(fields: [eventId], references: [id])
+  OrderDetails   OrderDetails[]
+}
+
+model UserPoint {
+  id        String      @id @default(uuid())
+  point     Int         @default(10000)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  expiredAt DateTime    @db.Date
+  status    BonusStatus @default(Available)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  orderId   Int?
+  order     Order?      @relation(fields: [orderId], references: [id])
+}
+
+model UserCoupon {
+  id         String      @id @default(uuid())
+  percentage Int         @default(10)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  expiredAt  DateTime    @db.Date
+  status     BonusStatus @default(Available)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  orderId    Int?
+  order      Order?      @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  totalPrice   Int
+  finalPrice   Int
+  status       OrderStatus    @default(Pending)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  expiredAt    DateTime       @db.Date
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  eventId      String
+  event        Event          @relation(fields: [eventId], references: [id])
+  OrderDetails OrderDetails[]
+  UserCoupon   UserCoupon[]
+  UserPoint    UserPoint[]
+}
+
+model OrderDetails {
+  id             String           @id @default(uuid())
+  qty            Int
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  orderId        Int
+  order          Order            @relation(fields: [orderId], references: [id])
+  ticketId       String
+  Ticket         Ticket           @relation(fields: [ticketId], references: [id])
+  AttendeeTicket AttendeeTicket[]
+}
+
+model AttendeeTicket {
+  id             String       @id @default(uuid())
+  isAttended     Boolean      @default(false)
+  orderDetailsId String
+  orderDetails   OrderDetails @relation(fields: [orderDetailsId], references: [id])
+  Review         Review[]
+}
+
+model Review {
+  id               String         @id @default(uuid())
+  description      String
+  rating           Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  eventId          String
+  event            Event          @relation(fields: [eventId], references: [id])
+  attendeeTicketId String         @unique
+  attendeeTicket   AttendeeTicket @relation(fields: [attendeeTicketId], references: [id])
 }

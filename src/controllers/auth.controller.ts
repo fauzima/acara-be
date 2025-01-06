@@ -8,6 +8,8 @@ import { transporter } from "../services/mailer";
 import path from "path";
 import fs from "fs";
 import handlebars from "handlebars";
+import dotenv from "dotenv";
+dotenv.config();
 
 export class AuthController {
   async registerUser(req: Request, res: Response) {
@@ -45,7 +47,7 @@ export class AuthController {
 
       const payload = { id: newUser.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
-      const link = `http://localhost:3000/user/verify/${token}`;
+      const link = `${process.env.BASE_URL_FE!}/user/verify/${token}`;
 
       const templatePath = path.join(
         __dirname,
@@ -172,7 +174,7 @@ export class AuthController {
 
       const payload = { id: newProm.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
-      const link = `http://localhost:3000/promotor/verify/${token}`;
+      const link = `${process.env.BASE_URL_FE!}/promotor/verify/${token}`;
 
       const templatePath = path.join(
         __dirname,
