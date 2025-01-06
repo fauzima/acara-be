@@ -22,6 +22,8 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 exports.upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
 app.use((0, cors_1.default)({
+    methods: "GET,POST,PATCH,DELETE,OPTIONS",
+    optionsSuccessStatus: 200,
     origin: `${process.env.BASE_URL_FE}`,
     credentials: true,
 }));

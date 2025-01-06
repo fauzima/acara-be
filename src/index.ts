@@ -19,6 +19,8 @@ app.use(express.json());
 export const upload = multer({ storage: multer.memoryStorage() });
 app.use(
   cors({
+    methods: "GET,POST,PATCH,DELETE,OPTIONS",
+    optionsSuccessStatus: 200,
     origin: `${process.env.BASE_URL_FE!}`,
     credentials: true,
   })
@@ -48,4 +50,4 @@ app.listen(PORT, () => {
   console.log(`server running on -> http://localhost:${PORT}/api`);
 });
 
-export default app
+export default app;
