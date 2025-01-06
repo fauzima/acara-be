@@ -22,6 +22,8 @@ const mailer_1 = require("../services/mailer");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const handlebars_1 = __importDefault(require("handlebars"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 class AuthController {
     registerUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {

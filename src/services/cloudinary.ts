@@ -1,5 +1,7 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import * as streamifier from "streamifier";
+import dotenv from "dotenv";
+dotenv.config();
 
 require("cloudinary");
 

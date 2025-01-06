@@ -8,6 +8,8 @@ import { transporter } from "../services/mailer";
 import path from "path";
 import fs from "fs";
 import handlebars from "handlebars";
+import dotenv from "dotenv";
+dotenv.config();
 
 export class AuthController {
   async registerUser(req: Request, res: Response) {

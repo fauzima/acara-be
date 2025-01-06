@@ -9,8 +9,8 @@ import multer from "multer";
 import cron from "node-cron";
 import { ScheduledTasks } from "./services/scheduler";
 import { OrderRouter } from "./routers/order.router";
-
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 const PORT: number = 8000;
 
