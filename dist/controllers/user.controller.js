@@ -95,5 +95,56 @@ class UserController {
             }
         });
     }
+    getUserRewards(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const id = (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id;
+                if (!id) {
+                    res.status(401).send({ message: "Unauthorized" });
+                    return; // Tambahkan return untuk menghentikan eksekusi
+                }
+                const userPoint = yield prisma_1.default.userPoint.findMany({
+                    where: {
+                        userId: id,
+                        expiredAt: {
+                            gte: new Date(),
+                        },
+                        status: "Available",
+                    },
+                    select: {
+                        id: true,
+                        point: true,
+                        expiredAt: true,
+                    },
+                });
+                const userCoupon = yield prisma_1.default.userCoupon.findMany({
+                    where: {
+                        userId: id,
+                        expiredAt: {
+                            gte: new Date(),
+                        },
+                        status: "Available",
+                    },
+                    select: {
+                        userId: true,
+                        percentage: true,
+                        expiredAt: true,
+                    },
+                });
+                res.status(200).send({
+                    point: userPoint,
+                    coupon: userCoupon,
+                });
+            }
+            catch (error) {
+                console.error("Error fetching customer rewards:", error);
+                res.status(500).send({
+                    message: "Internal Server Error",
+                    error,
+                });
+            }
+        });
+    }
 }
 exports.UserController = UserController;

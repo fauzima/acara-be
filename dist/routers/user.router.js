@@ -13,6 +13,7 @@ class UserRouter {
     initializeRoutes() {
         this.router.get("/", verify_1.verifyToken, this.userController.getUsers);
         this.router.get("/profile", verify_1.verifyToken, this.userController.getUserId);
+        this.router.get("/userdetail", verify_1.verifyToken, this.userController.getUserRewards);
         this.router.post("/", this.userController.createUser);
         this.router.patch("/:id", this.userController.editUser);
         this.router.delete("/:id", this.userController.deleteUser);

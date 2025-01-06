@@ -273,7 +273,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Purwadhika\\Codes\\acara-be\\prisma\\generated\\client",
+      "value": "C:\\Users\\salman ahady\\OneDrive\\Documents\\JCWD0508\\acara-be\\acara-be\\prisma\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -287,7 +287,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Purwadhika\\Codes\\acara-be\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\salman ahady\\OneDrive\\Documents\\JCWD0508\\acara-be\\acara-be\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -34,13 +34,12 @@ class OrderController {
                         ticketId: item.ticketId,
                     });
                 }
-                //deklarasi dan create order
+                //deklarasi create order
                 const order = yield prisma_1.default.order.create({
                     data: {
-                        id: +id,
                         totalPrice: +totalPrice,
                         finalPrice: +finalPrice,
-                        expiredAt,
+                        expiredAt: expiredAt,
                         userId: (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id,
                         eventId: id,
                         OrderDetails: {

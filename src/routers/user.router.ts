@@ -15,6 +15,11 @@ export class UserRouter {
   private initializeRoutes() {
     this.router.get("/", verifyToken, this.userController.getUsers);
     this.router.get("/profile", verifyToken, this.userController.getUserId);
+    this.router.get(
+      "/userdetail",
+      verifyToken,
+      this.userController.getUserRewards
+    );
     this.router.post("/", this.userController.createUser);
 
     this.router.patch("/:id", this.userController.editUser);
