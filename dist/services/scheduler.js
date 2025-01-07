@@ -16,10 +16,36 @@ exports.ScheduledTasks = void 0;
 const prisma_1 = __importDefault(require("../prisma"));
 const ScheduledTasks = () => __awaiter(void 0, void 0, void 0, function* () {
     const now = new Date();
+    const order = yield prisma_1.default.order.findMany({
+        where: { AND: { expiredAt: { lte: now }, status: "Pending" } },
+    });
     yield prisma_1.default.order.updateMany({
         data: { status: "Expired" },
         where: { AND: { expiredAt: { lte: now }, status: "Pending" } },
     });
+    if (order) {
+        for (const item of order) {
+            yield prisma_1.default.userPoint.updateMany({
+                data: { orderId: null },
+                where: { orderId: item.id },
+            });
+            yield prisma_1.default.userCoupon.updateMany({
+                data: { orderId: null },
+                where: { orderId: item.id },
+            });
+            //reset jatah tiket di record ticket dari tiap orderDetails
+            const orderDetails = yield prisma_1.default.orderDetails.findMany({
+                where: { orderId: item.id },
+                select: { id: true, qty: true, ticketId: true },
+            });
+            for (const item of orderDetails) {
+                yield prisma_1.default.ticket.update({
+                    data: { remainingSeats: { increment: item.qty } },
+                    where: { id: item.ticketId },
+                });
+            }
+        }
+    }
     yield prisma_1.default.userCoupon.updateMany({
         data: { status: "Expired" },
         where: { AND: { expiredAt: { lte: now }, status: "Available" } },

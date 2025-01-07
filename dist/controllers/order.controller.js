@@ -18,30 +18,41 @@ const axios_1 = __importDefault(require("axios"));
 class OrderController {
     createOrder(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             try {
                 // dapetin id dari params
                 const { id } = req.params;
                 // kalkulasi totalPrice sama finalPrice udah dilakuin di front end, di Order details ada informasi qty untuk tiap tiket (bisa 1 kategori tiket aja atau banyak)
                 const { totalPrice, finalPrice, OrderDetails, UserCoupon, UserPoint, } = req.body;
+                // penjaga untuk tidak bisa mengakses selain pembeli
+                const accId = req.acc;
+                if (!accId || accId.role == "promotor") {
+                    throw { message: "Tidak ada izin untuk mengakses!" };
+                }
                 // bikin timer buat kadaluarsa order
                 const expiredAt = new Date(new Date().getTime() + 3600000);
                 //ngeformat qty ditiap orderDetails dari jsonstring jadi numnber
                 const formattedOrderDetails = [];
                 for (const item of OrderDetails) {
+                    const ticket = yield prisma_1.default.ticket.findUnique({
+                        where: { id: item.ticketId },
+                    });
+                    if (+item.qty >= (ticket === null || ticket === void 0 ? void 0 : ticket.remainingSeats)) {
+                        throw {
+                            message: `Jatah tiket ${ticket === null || ticket === void 0 ? void 0 : ticket.category} sudah tidak cukup!`,
+                        };
+                    }
                     formattedOrderDetails.push({
                         qty: +item.qty,
                         ticketId: item.ticketId,
                     });
                 }
-                //deklarasi dan create order
+                //deklarasi create order
                 const order = yield prisma_1.default.order.create({
                     data: {
-                        id: +id,
                         totalPrice: +totalPrice,
                         finalPrice: +finalPrice,
-                        expiredAt,
-                        userId: (_a = req.acc) === null || _a === void 0 ? void 0 : _a.id,
+                        expiredAt: expiredAt,
+                        userId: accId.id,
                         eventId: id,
                         OrderDetails: {
                             create: formattedOrderDetails,
@@ -121,8 +132,11 @@ class OrderController {
             try {
                 // terima notif pembayaran dari midtrans
                 const { transaction_status, order_id } = req.body;
+                const order = yield prisma_1.default.order.findUnique({
+                    where: { id: +order_id },
+                });
                 // flow jika pembayaran lunas sebelum expire
-                if (transaction_status == "settlement") {
+                if (transaction_status == "settlement" && (order === null || order === void 0 ? void 0 : order.status) == "Pending") {
                     // update order jadi paid
                     yield prisma_1.default.order.update({
                         data: { status: "Paid" },
@@ -143,7 +157,7 @@ class OrderController {
                         select: { id: true, qty: true, ticketId: true },
                     });
                     for (const item of orderDetails) {
-                        for (let i = 0; i <= item.qty; i++) {
+                        for (let i = 0; i < item.qty; i++) {
                             yield prisma_1.default.attendeeTicket.create({
                                 data: {
                                     orderDetailsId: item.id,
@@ -153,7 +167,7 @@ class OrderController {
                     }
                 }
                 // flow jika pembayaran belum lunas setelah expire
-                if (transaction_status == "canceled") {
+                if (transaction_status == "canceled" && (order === null || order === void 0 ? void 0 : order.status) == "Pending") {
                     // update order jadi expired
                     yield prisma_1.default.order.update({
                         data: { status: "Expired" },
@@ -180,7 +194,7 @@ class OrderController {
                         });
                     }
                 }
-                res.status(200).send({ message: "Order updated" });
+                res.status(200).send({ message: "Status pesanan diperbarui!" });
             }
             catch (err) {
                 console.log(err);

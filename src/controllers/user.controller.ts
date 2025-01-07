@@ -71,4 +71,52 @@ export class UserController {
       res.status(400).send(error);
     }
   }
+
+  async getUserRewards(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.acc?.id;
+      if (!id) {
+        res.status(401).send({ message: "Unauthorized" });
+        return; // Tambahkan return untuk menghentikan eksekusi
+      }
+      const userPoint = await prisma.userPoint.findMany({
+        where: {
+          userId: id,
+          expiredAt: {
+            gte: new Date(),
+          },
+          status: "Available",
+        },
+        select: {
+          id: true,
+          point: true,
+          expiredAt: true,
+        },
+      });
+      const userCoupon = await prisma.userCoupon.findMany({
+        where: {
+          userId: id,
+          expiredAt: {
+            gte: new Date(),
+          },
+          status: "Available",
+        },
+        select: {
+          userId: true,
+          percentage: true,
+          expiredAt: true,
+        },
+      });
+      res.status(200).send({
+        point: userPoint,
+        coupon: userCoupon,
+      });
+    } catch (error) {
+      console.error("Error fetching customer rewards:", error);
+      res.status(500).send({
+        message: "Internal Server Error",
+        error,
+      });
+    }
+  }
 }

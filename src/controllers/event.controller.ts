@@ -2,18 +2,65 @@ import { Request, Response } from "express";
 import prisma from "../prisma";
 import { cloudinaryUpload } from "../services/cloudinary";
 import { IEvent, ITicket, ITicketReq } from "../types/types";
+import { EventCategory, EventLocation } from "../../prisma/generated/client";
 
 export class EventController {
   async getEvents(req: Request, res: Response) {
     try {
-      const now = new Date();
+      const {
+        title,
+        category,
+        location,
+        promotor,
+        page = "1",
+        limit = "6",
+        type = "upcoming",
+      } = req.query;
+
+      const filter: any[] = [];
+
+      if (title) {
+        filter.push({
+          title: { contains: title as string, mode: "insensitive" },
+        });
+      }
+      if (category) {
+        filter.push({
+          category: { equals: category as EventCategory },
+        });
+      }
+      if (location) {
+        filter.push({
+          location: { equals: location as EventLocation },
+        });
+      }
+      if (promotor) {
+        filter.push({
+          promotor: { name: { contains: promotor as string } },
+        });
+      }
+      if (type == "upcoming") {
+        filter.push({
+          startDate: { gte: new Date() },
+        });
+      }
+
+      if (type == "previous") {
+        filter.push({
+          startDate: { lte: new Date() },
+        });
+      }
+
+      const countEvents = await prisma.event.aggregate({
+        where: { AND: filter },
+        _count: { _all: true },
+      });
+
+      const totalPage = Math.ceil(+countEvents._count._all / +limit);
+
       const data = await prisma.event.findMany({
-        where: {
-          startDate: { gte: now },
-        },
-        orderBy: {
-          startDate: "asc",
-        },
+        where: { AND: filter, startDate: {} },
+        orderBy: { startDate: "asc" },
         select: {
           id: true,
           title: true,
@@ -22,6 +69,7 @@ export class EventController {
           startDate: true,
           promotor: {
             select: {
+              id: true,
               name: true,
               avatar: true,
             },
@@ -36,6 +84,8 @@ export class EventController {
             take: 1,
           },
         },
+        take: +limit,
+        skip: +limit * (+page - 1),
       });
 
       const events = [];
@@ -49,12 +99,13 @@ export class EventController {
           thumbnail: item.thumbnail as string,
           startDate: item.startDate,
           price: price,
+          promotorId: item.promotor.id,
           avatar: item.promotor.avatar,
           name: item.promotor.name,
         });
       }
 
-      res.status(200).send({ events: events });
+      res.status(200).send({ events, totalPage, page });
     } catch (error) {
       console.log(error);
       res.status(400).send(error);
@@ -113,6 +164,16 @@ export class EventController {
 
       const minPrice = Ticket.sort((a, b) => a.price - b.price)[0].price;
 
+      const earliestTicket = [...Ticket].sort(
+        (a, b) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      )[0].startDate;
+
+      const latestTicket = [...Ticket].sort(
+        (a, b) =>
+          new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+      )[0].endDate;
+
       res.status(200).send({
         event: {
           id: data?.id!,
@@ -122,6 +183,8 @@ export class EventController {
           endDate: data?.endDate!,
           thumbnail: data?.thumbnail!,
           minPrice: minPrice,
+          earliestTicket: earliestTicket,
+          latestTicket: latestTicket,
           location: data?.location! as string,
           venue: data?.venue!,
           desc: data?.desc!,
@@ -153,6 +216,12 @@ export class EventController {
         endDate,
         Ticket,
       }: IEvent = req.body;
+
+      // penjaga untuk tidak bisa mengakses selain promotor
+      const accId = req.acc;
+      if (!accId || accId.role == "user") {
+        throw "Tidak ada izin untuk mengakses!";
+      }
 
       const parsedTicket: ITicketReq[] = JSON.parse(Ticket);
 

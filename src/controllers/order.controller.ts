@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
 import axios from "axios";
+import { OrderDetails } from "prisma/generated/client";
 
 //deklarasi tipe untuk request
 interface IOrderDetailsReq {
@@ -36,6 +37,12 @@ export class OrderController {
         UserPoint,
       }: IOrder = req.body;
 
+      // penjaga untuk tidak bisa mengakses selain pembeli
+      const accId = req.acc;
+      if (!accId || accId.role == "promotor") {
+        throw { message: "Tidak ada izin untuk mengakses!" };
+      }
+
       // bikin timer buat kadaluarsa order
       const expiredAt = new Date(new Date().getTime() + 3600000);
 
@@ -43,20 +50,29 @@ export class OrderController {
       const formattedOrderDetails: IOrderDetails[] = [];
 
       for (const item of OrderDetails) {
+        const ticket = await prisma.ticket.findUnique({
+          where: { id: item.ticketId },
+        });
+
+        if (+item.qty >= ticket?.remainingSeats!) {
+          throw {
+            message: `Jatah tiket ${ticket?.category} sudah tidak cukup!`,
+          };
+        }
+
         formattedOrderDetails.push({
           qty: +item.qty,
           ticketId: item.ticketId,
         });
       }
 
-      //deklarasi dan create order
+      //deklarasi create order
       const order: any = await prisma.order.create({
         data: {
-          id: +id,
           totalPrice: +totalPrice,
           finalPrice: +finalPrice,
-          expiredAt,
-          userId: req.acc?.id!,
+          expiredAt: expiredAt,
+          userId: accId.id!,
           eventId: id,
           OrderDetails: {
             create: formattedOrderDetails,
@@ -144,8 +160,12 @@ export class OrderController {
       // terima notif pembayaran dari midtrans
       const { transaction_status, order_id } = req.body;
 
+      const order = await prisma.order.findUnique({
+        where: { id: +order_id },
+      });
+
       // flow jika pembayaran lunas sebelum expire
-      if (transaction_status == "settlement") {
+      if (transaction_status == "settlement" && order?.status! == "Pending") {
         // update order jadi paid
         await prisma.order.update({
           data: { status: "Paid" },
@@ -170,7 +190,7 @@ export class OrderController {
         });
 
         for (const item of orderDetails) {
-          for (let i = 0; i <= item.qty; i++) {
+          for (let i = 0; i < item.qty; i++) {
             await prisma.attendeeTicket.create({
               data: {
                 orderDetailsId: item.id,
@@ -181,7 +201,7 @@ export class OrderController {
       }
 
       // flow jika pembayaran belum lunas setelah expire
-      if (transaction_status == "canceled") {
+      if (transaction_status == "canceled" && order?.status! == "Pending") {
         // update order jadi expired
         await prisma.order.update({
           data: { status: "Expired" },
@@ -213,7 +233,7 @@ export class OrderController {
         }
       }
 
-      res.status(200).send({ message: "Order updated" });
+      res.status(200).send({ message: "Status pesanan diperbarui!" });
     } catch (err) {
       console.log(err);
       res.status(400).send(err);

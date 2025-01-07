@@ -93,7 +93,7 @@ model Event {
 }
 
 model Ticket {
-  id             String           @id @default(uuid())
+  id             String         @id @default(uuid())
   category       String
   desc           String
   seats          Int
@@ -101,10 +101,10 @@ model Ticket {
   price          BigInt
   startDate      DateTime
   endDate        DateTime
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   eventId        String
-  event          Event            @relation(fields: [eventId], references: [id])
+  event          Event          @relation(fields: [eventId], references: [id])
   OrderDetails   OrderDetails[]
 }
 
@@ -113,7 +113,7 @@ model UserPoint {
   point     Int         @default(10000)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  expiredAt DateTime    @db.Date
+  expiredAt DateTime
   status    BonusStatus @default(Available)
   userId    String
   user      User        @relation(fields: [userId], references: [id])
@@ -126,7 +126,7 @@ model UserCoupon {
   percentage Int         @default(10)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  expiredAt  DateTime    @db.Date
+  expiredAt  DateTime
   status     BonusStatus @default(Available)
   userId     String
   user       User        @relation(fields: [userId], references: [id])
@@ -141,7 +141,7 @@ model Order {
   status       OrderStatus    @default(Pending)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  expiredAt    DateTime       @db.Date
+  expiredAt    DateTime
   userId       String
   user         User           @relation(fields: [userId], references: [id])
   eventId      String
